@@ -2,6 +2,24 @@
 
 Este projeto salva o perfil do Outlook em snapshots no OneDrive e mantém uma rotina automática no macOS.
 
+## Requisitos
+
+- macOS
+- Python 3.9 ou superior
+- Microsoft Outlook para Mac
+- OneDrive instalado e configurado, caso o destino esteja no OneDrive
+
+O projeto usa somente a biblioteca padrão do Python. O arquivo `requirements.txt` documenta que não há pacotes externos para instalar.
+
+Para verificar a instalação:
+
+```bash
+python3 --version
+python3 -m pip install -r requirements.txt
+```
+
+O comando `pip` não instalará pacotes adicionais.
+
 ## O que ele faz
 
 - compacta o perfil do Outlook em arquivos ZIP no destino de backup
