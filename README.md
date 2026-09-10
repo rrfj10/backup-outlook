@@ -26,8 +26,8 @@ O comando `pip` não instalará pacotes adicionais.
 - cria snapshots com data e hora
 - mantém backups recentes automaticamente
 - permite restaurar o último snapshot ou um específico
-- roda todos os dias às 2:00
-- roda ao fazer login e tenta novamente a cada 15 minutos se o Outlook estiver aberto
+- roda uma vez por dia às 2:00
+- se o Mac estiver dormindo no horário, o macOS executa o agendamento quando ele voltar a ficar ativo
 
 ## Caminho do Outlook e destino
 
@@ -98,14 +98,6 @@ Agente em:
 ~/Library/LaunchAgents/com.backupoutlook.daily.plist
 ```
 
-### Backup ao fazer login
-
-Agente em:
-
-```bash
-~/Library/LaunchAgents/com.backupoutlook.login.plist
-```
-
 ### Verificar se os agentes estão ativos
 
 ```bash
@@ -116,7 +108,6 @@ launchctl list | grep -E 'backupoutlook|backup.outlook'
 
 ```bash
 launchctl bootout "gui/$(id -u)/com.backupoutlook.daily"
-launchctl bootout "gui/$(id -u)/com.backupoutlook.login"
 ```
 
 ### Instalar a automação
@@ -127,7 +118,7 @@ Execute uma vez a partir desta pasta:
 ./install_automation.sh
 ```
 
-O instalador mantém uma cópia operacional em `~/Library/Application Support/BackupOutlook`, instala os agentes do macOS e recarrega os serviços. Depois da instalação, o SSD externo pode ficar desconectado.
+O instalador mantém uma cópia operacional em `~/Library/Application Support/BackupOutlook`, instala o agente diário do macOS e recarrega o serviço. Depois da instalação, o SSD externo pode ficar desconectado.
 
 ## Importante
 
@@ -141,6 +132,7 @@ O instalador mantém uma cópia operacional em `~/Library/Application Support/Ba
 - antes de iniciar uma operação grande, o programa verifica o espaço livre e interrompe a operação se a margem for insuficiente
 - somente o último ZIP `*.pre_restore_*.zip` é mantido localmente; os anteriores são removidos após uma restauração bem-sucedida
 - o programa bloqueia backup e restauração enquanto o Microsoft Outlook estiver aberto
+- cada execução também grava eventos em `backup_outlook.log` dentro do destino configurado
 - para recuperar uma pasta específica, idealmente restaure o perfil completo e depois acesse a estrutura original
 
 ## Configuração por ambiente

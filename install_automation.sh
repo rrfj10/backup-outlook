@@ -16,6 +16,8 @@ fi
 
 launchctl bootout "gui/$UID_VALUE/com.backupoutlook.onwake" 2>/dev/null || true
 rm -f "$LAUNCH_AGENTS_DIR/com.backupoutlook.onwake.plist"
+launchctl bootout "gui/$UID_VALUE/com.backupoutlook.login" 2>/dev/null || true
+rm -f "$LAUNCH_AGENTS_DIR/com.backupoutlook.login.plist"
 
 for template in "$PROJECT_DIR"/launchagents/*.plist.in; do
     output="$LAUNCH_AGENTS_DIR/$(basename "$template" .in)"
@@ -28,4 +30,4 @@ for template in "$PROJECT_DIR"/launchagents/*.plist.in; do
 done
 
 echo "Automação instalada. Script operacional: $RUNTIME_SCRIPT"
-echo "Agentes ativos: com.backupoutlook.daily e com.backupoutlook.login"
+echo "Agente ativo: com.backupoutlook.daily às 2:00"
