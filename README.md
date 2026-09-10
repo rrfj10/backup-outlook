@@ -22,7 +22,7 @@ $HOME/Library/Group Containers/UBF8T346G9.Office/Outlook/Outlook 15 Profiles/Mai
 Destino padrão:
 
 ```bash
-$HOME/Library/CloudStorage/OneDrive-Pessoal/03 - Backup_Empresa/00 - Email/04 - 3F
+$HOME/Library/CloudStorage/OneDrive/Outlook-Backups
 ```
 
 ## Comandos principais
@@ -30,7 +30,7 @@ $HOME/Library/CloudStorage/OneDrive-Pessoal/03 - Backup_Empresa/00 - Email/04 - 
 ### Fazer backup manual
 
 ```bash
-cd /Volumes/SSD_WORKSPA/Development/tools/backup_outlook
+cd <diretorio-do-projeto>
 python3 backup_outlook_professional.py backup
 ```
 
@@ -61,7 +61,7 @@ python3 backup_outlook_professional.py restore-latest
 ### Restaurar um backup específico
 
 ```bash
-python3 backup_outlook_professional.py restore "$HOME/Library/CloudStorage/OneDrive-Pessoal/03 - Backup_Empresa/00 - Email/04 - 3F/Outlook_Profile_20260910_132754.zip"
+python3 backup_outlook_professional.py restore "$HOME/Library/CloudStorage/OneDrive/Outlook-Backups/Outlook_Profile_YYYYMMDD_HHMMSS.zip"
 ```
 
 ### Limpar backups antigos
@@ -139,7 +139,7 @@ Exemplo de configuração:
 
 ```bash
 ORIGEM="$HOME/Library/Group Containers/UBF8T346G9.Office/Outlook/Outlook 15 Profiles/Main Profile"
-DESTINO="$HOME/Library/CloudStorage/OneDrive-Pessoal/03 - Backup_Empresa/00 - Email/04 - 3F"
+DESTINO="$HOME/Library/CloudStorage/OneDrive/Outlook-Backups"
 ```
 
 ## Quando usar

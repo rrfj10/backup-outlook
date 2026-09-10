@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 DEFAULT_ORIGEM = Path.home() / "Library" / "Group Containers" / "UBF8T346G9.Office" / "Outlook" / "Outlook 15 Profiles" / "Main Profile"
-DEFAULT_DESTINO = Path.home() / "Library" / "CloudStorage" / "OneDrive-Pessoal" / "03 - Backup_Empresa" / "00 - Email" / "04 - 3F"
+DEFAULT_DESTINO = Path.home() / "Library" / "CloudStorage" / "OneDrive" / "Outlook-Backups"
 DEFAULT_RETENTION_DAYS = 30
 DEFAULT_MAX_BACKUPS = 20
 DEFAULT_MAX_PRE_RESTORE_BACKUPS = 1
