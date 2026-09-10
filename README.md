@@ -43,82 +43,124 @@ Destino padrão:
 $HOME/Library/CloudStorage/OneDrive/Outlook-Backups
 ```
 
-## Comandos principais
+## Instalação inicial
 
-### Fazer backup manual
-
-```bash
-cd <diretorio-do-projeto>
-python3 backup_outlook_professional.py backup
-```
-
-Para forçar uma nova cópia mesmo sem alterações detectadas:
+Clone o projeto a partir da pasta pai. Não execute `git clone` estando dentro de outra pasta `backup-outlook`, pois isso criará uma cópia aninhada.
 
 ```bash
-python3 backup_outlook_professional.py backup --force
+cd "$HOME"
+git clone https://github.com/rrfj10/backup-outlook.git backup-outlook
+cd "$HOME/backup-outlook"
 ```
 
-### Ver backups disponíveis
+Crie a configuração privada. O arquivo `.env` não deve ser publicado no GitHub:
 
 ```bash
-python3 backup_outlook_professional.py list
+mkdir -p "$HOME/Library/Application Support/BackupOutlook"
+cp .env.example "$HOME/Library/Application Support/BackupOutlook/.env"
+chmod 600 "$HOME/Library/Application Support/BackupOutlook/.env"
 ```
 
-### Ver o último backup
+Edite `ORIGEM` e `DESTINO` conforme os caminhos reais da sua máquina:
 
 ```bash
-python3 backup_outlook_professional.py latest
+nano "$HOME/Library/Application Support/BackupOutlook/.env"
 ```
 
-### Restaurar o último backup
+Instale a automação:
 
 ```bash
-python3 backup_outlook_professional.py restore-latest
+chmod +x install_automation.sh
+./install_automation.sh
 ```
 
-### Restaurar um backup específico
+O instalador copia o script para `~/Library/Application Support/BackupOutlook` e instala o agente diário às 2:00. O projeto clonado é apenas a fonte de atualização; o macOS executa a cópia de produção.
 
-```bash
-python3 backup_outlook_professional.py restore "$HOME/Library/CloudStorage/OneDrive/Outlook-Backups/Outlook_Profile_YYYYMMDD_HHMMSS.zip"
-```
-
-### Limpar backups antigos
-
-```bash
-python3 backup_outlook_professional.py cleanup --days 30 --count 20
-```
-
-## Agendamento no macOS
-
-### Backup diário às 2:00
-
-Agente em:
-
-```bash
-~/Library/LaunchAgents/com.backupoutlook.daily.plist
-```
-
-### Verificar se os agentes estão ativos
+Verifique a instalação:
 
 ```bash
 launchctl list | grep -E 'backupoutlook|backup.outlook'
 ```
 
-### Remover os agentes
+O resultado esperado é:
+
+```text
+-       0       com.backupoutlook.daily
+```
+
+## Atualizar a produção
+
+Quando houver uma nova versão no GitHub, entre na pasta do clone existente e atualize-a. Não execute `git clone` novamente:
+
+```bash
+cd "$HOME/backup-outlook"
+git pull origin main
+./install_automation.sh
+```
+
+O instalador atualiza a cópia de produção, preserva o `.env` existente e recarrega o agente diário.
+
+## Operação manual
+
+Feche completamente o Outlook antes de executar backup ou restauração.
+
+### Fazer backup
+
+```bash
+python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professional.py" backup
+```
+
+Para forçar uma nova cópia mesmo sem alterações detectadas:
+
+```bash
+python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professional.py" backup --force
+```
+
+### Ver backups disponíveis
+
+```bash
+python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professional.py" list
+```
+
+### Ver o último backup
+
+```bash
+python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professional.py" latest
+```
+
+### Restaurar o último backup
+
+```bash
+python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professional.py" restore-latest
+```
+
+### Restaurar um backup específico
+
+```bash
+python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professional.py" restore "$HOME/Library/CloudStorage/OneDrive/Outlook-Backups/Outlook_Profile_YYYYMMDD_HHMMSS.zip"
+```
+
+### Limpar backups antigos
+
+```bash
+python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professional.py" cleanup --days 30 --count 20
+```
+
+## Agendamento no macOS
+
+O agente diário fica em:
+
+```bash
+~/Library/LaunchAgents/com.backupoutlook.daily.plist
+```
+
+Se o Mac estiver dormindo às 2:00, o macOS executa o agendamento quando voltar a ficar ativo.
+
+Para remover o agente:
 
 ```bash
 launchctl bootout "gui/$(id -u)/com.backupoutlook.daily"
 ```
-
-### Instalar a automação
-
-Execute uma vez a partir desta pasta:
-
-```bash
-./install_automation.sh
-```
-
-O instalador mantém uma cópia operacional em `~/Library/Application Support/BackupOutlook`, instala o agente diário do macOS e recarrega o serviço. Depois da instalação, o SSD externo pode ficar desconectado.
 
 ## Importante
 
