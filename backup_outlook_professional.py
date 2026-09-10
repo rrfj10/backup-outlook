@@ -395,7 +395,12 @@ def parse_args():
 
 
 def main():
-    load_dotenv()
+    try:
+        load_dotenv()
+    except (OSError, ValueError) as exc:
+        print(f"Erro: {exc}")
+        return 1
+
     args = parse_args()
     origem = Path(os.environ.get("ORIGEM", str(DEFAULT_ORIGEM)))
     destino = Path(os.environ.get("DESTINO", str(DEFAULT_DESTINO)))
