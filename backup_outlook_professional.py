@@ -89,6 +89,8 @@ def ensure_destination_exists(destino: Path):
 def configure_log_file(destino: Path):
     global LOG_PATH
     LOG_PATH = destino / LOG_FILENAME
+    destino.mkdir(parents=True, exist_ok=True)
+    LOG_PATH.touch(exist_ok=True)
 
 
 def directory_size(path: Path) -> int:
@@ -418,7 +420,11 @@ def main():
     args = parse_args()
     origem = Path(os.environ.get("ORIGEM", str(DEFAULT_ORIGEM)))
     destino = Path(os.environ.get("DESTINO", str(DEFAULT_DESTINO)))
-    configure_log_file(destino)
+    try:
+        configure_log_file(destino)
+    except OSError as exc:
+        print(f"Erro: não foi possível criar o arquivo de log {destino / LOG_FILENAME}: {exc}")
+        return 1
 
     if args.command in (None, "help"):
         print("Uso: backup_outlook_professional.py [backup|restore <snapshot>|list|latest|restore-latest|cleanup --days N --count N]")
