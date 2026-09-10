@@ -28,6 +28,7 @@ O comando `pip` não instalará pacotes adicionais.
 - permite restaurar o último snapshot ou um específico
 - roda uma vez por dia às 2:00
 - se o Mac estiver dormindo no horário, o macOS executa o agendamento quando ele voltar a ficar ativo
+- cria automaticamente a pasta de destino e `backup_outlook.log` se ainda não existirem
 
 ## Caminho do Outlook e destino
 
@@ -75,6 +76,8 @@ chmod +x install_automation.sh
 ```
 
 O instalador copia o script para `~/Library/Application Support/BackupOutlook` e instala o agente diário às 2:00. O projeto clonado é apenas a fonte de atualização; o macOS executa a cópia de produção.
+
+Na primeira execução, o programa cria automaticamente o destino configurado e o arquivo `backup_outlook.log`. Não é necessário criar o log manualmente.
 
 Verifique a instalação:
 
