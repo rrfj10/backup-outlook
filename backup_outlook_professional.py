@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -20,6 +21,7 @@ MIN_FREE_SPACE_BYTES = 1024 * 1024 * 1024
 SNAPSHOT_PREFIX = "Outlook_Profile_"
 STATE_FILENAME = ".outlook_profile_state.json"
 RETRY_ERRNOS = {4, 5, 23}
+CONFIG_FILENAME = ".env"
 
 
 def now_stamp() -> str:
@@ -29,6 +31,30 @@ def now_stamp() -> str:
 def log(message: str):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[{timestamp}] {message}")
+
+
+def load_dotenv():
+    config_path = Path(os.environ.get("BACKUP_OUTLOOK_CONFIG", Path.home() / "Library" / "Application Support" / "BackupOutlook" / CONFIG_FILENAME))
+    if not config_path.exists():
+        return
+    try:
+        lines = config_path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, value = stripped.split("=", 1)
+        key = key.strip()
+        if not key or key in os.environ:
+            continue
+        try:
+            tokens = shlex.split(value, comments=True)
+            parsed_value = tokens[0] if tokens else ""
+        except ValueError as exc:
+            raise ValueError(f"Configuração inválida em {config_path}: {exc}") from exc
+        os.environ[key] = os.path.expandvars(os.path.expanduser(parsed_value))
 
 
 def ensure_source_exists(origem: Path):
@@ -361,6 +387,7 @@ def parse_args():
 
 
 def main():
+    load_dotenv()
     args = parse_args()
     origem = Path(os.environ.get("ORIGEM", str(DEFAULT_ORIGEM)))
     destino = Path(os.environ.get("DESTINO", str(DEFAULT_DESTINO)))

@@ -10,6 +10,9 @@ UID_VALUE=$(id -u)
 
 mkdir -p "$RUNTIME_DIR" "$LAUNCH_AGENTS_DIR" "$LOG_DIR"
 install -m 755 "$PROJECT_DIR/backup_outlook_professional.py" "$RUNTIME_SCRIPT"
+if [ ! -f "$RUNTIME_DIR/.env" ] && [ -f "$PROJECT_DIR/.env" ]; then
+    install -m 600 "$PROJECT_DIR/.env" "$RUNTIME_DIR/.env"
+fi
 
 launchctl bootout "gui/$UID_VALUE/com.backupoutlook.onwake" 2>/dev/null || true
 rm -f "$LAUNCH_AGENTS_DIR/com.backupoutlook.onwake.plist"

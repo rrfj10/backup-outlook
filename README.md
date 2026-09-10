@@ -127,12 +127,19 @@ O instalador mantém uma cópia operacional em `~/Library/Application Support/Ba
 
 ## Configuração por ambiente
 
-Para alterar os caminhos sem editar o script:
+Copie o modelo para a configuração local da automação:
 
 ```bash
-ORIGEM="$HOME/Library/Group Containers/UBF8T346G9.Office/Outlook/Outlook 15 Profiles/Main Profile" \
-DESTINO="$HOME/Library/CloudStorage/OneDrive-Pessoal/03 - Backup_Empresa/00 - Email/04 - 3F" \
-python3 backup_outlook_professional.py backup
+cp .env.example "$HOME/Library/Application Support/BackupOutlook/.env"
+```
+
+Edite esse arquivo e altere `ORIGEM` e `DESTINO` conforme necessário. O arquivo `.env` real é ignorado pelo Git e não será publicado. Variáveis definidas diretamente no shell têm prioridade sobre o `.env`.
+
+Exemplo de configuração:
+
+```bash
+ORIGEM="$HOME/Library/Group Containers/UBF8T346G9.Office/Outlook/Outlook 15 Profiles/Main Profile"
+DESTINO="$HOME/Library/CloudStorage/OneDrive-Pessoal/03 - Backup_Empresa/00 - Email/04 - 3F"
 ```
 
 ## Quando usar
