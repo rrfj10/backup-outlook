@@ -22,6 +22,8 @@ SNAPSHOT_PREFIX = "Outlook_Profile_"
 STATE_FILENAME = ".outlook_profile_state.json"
 RETRY_ERRNOS = {4, 5, 23}
 CONFIG_FILENAME = ".env"
+LOG_FILENAME = "backup_outlook.log"
+LOG_PATH = None
 
 
 def now_stamp() -> str:
@@ -30,7 +32,14 @@ def now_stamp() -> str:
 
 def log(message: str):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"[{timestamp}] {message}")
+    line = f"[{timestamp}] {message}"
+    print(line)
+    if LOG_PATH is not None:
+        try:
+            with LOG_PATH.open("a", encoding="utf-8") as log_file:
+                log_file.write(line + "\n")
+        except OSError:
+            pass
 
 
 def load_dotenv():
@@ -75,6 +84,11 @@ def ensure_outlook_closed():
 
 def ensure_destination_exists(destino: Path):
     destino.mkdir(parents=True, exist_ok=True)
+
+
+def configure_log_file(destino: Path):
+    global LOG_PATH
+    LOG_PATH = destino / LOG_FILENAME
 
 
 def directory_size(path: Path) -> int:
@@ -404,6 +418,7 @@ def main():
     args = parse_args()
     origem = Path(os.environ.get("ORIGEM", str(DEFAULT_ORIGEM)))
     destino = Path(os.environ.get("DESTINO", str(DEFAULT_DESTINO)))
+    configure_log_file(destino)
 
     if args.command in (None, "help"):
         print("Uso: backup_outlook_professional.py [backup|restore <snapshot>|list|latest|restore-latest|cleanup --days N --count N]")
