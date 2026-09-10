@@ -27,7 +27,7 @@ O comando `pip` não instalará pacotes adicionais.
 - mantém backups recentes automaticamente
 - permite restaurar o último snapshot ou um específico
 - roda todos os dias às 2:00
-- roda também uma vez ao fazer login no macOS
+- roda ao fazer login e tenta novamente a cada 15 minutos se o Outlook estiver aberto
 
 ## Caminho do Outlook e destino
 
@@ -151,7 +151,7 @@ Copie o modelo para a configuração local da automação:
 cp .env.example "$HOME/Library/Application Support/BackupOutlook/.env"
 ```
 
-Edite esse arquivo e altere `ORIGEM` e `DESTINO` conforme necessário. O arquivo `.env` real é ignorado pelo Git e não será publicado. Variáveis definidas diretamente no shell têm prioridade sobre o `.env`.
+Edite esse arquivo e altere `ORIGEM` e `DESTINO` conforme necessário. O arquivo `.env` real é ignorado pelo Git e não será publicado. Variáveis definidas diretamente no shell têm prioridade sobre o `.env`. Se o arquivo existir, mas não puder ser lido, o programa interromperá a execução em vez de usar um destino diferente silenciosamente.
 
 Exemplo de configuração:
 

@@ -39,8 +39,8 @@ def load_dotenv():
         return
     try:
         lines = config_path.read_text(encoding="utf-8").splitlines()
-    except OSError:
-        return
+    except OSError as exc:
+        raise OSError(f"Não foi possível ler a configuração {config_path}: {exc}") from exc
     for line in lines:
         stripped = line.strip()
         if not stripped or stripped.startswith("#") or "=" not in stripped:
@@ -95,11 +95,19 @@ def profile_signature(path: Path) -> str:
         try:
             if item.is_file():
                 stat = item.stat()
-                entries.append((str(item.relative_to(path)), stat.st_size, stat.st_mtime_ns))
+                entries.append(
+                    (
+                        str(item.relative_to(path)),
+                        stat.st_ino,
+                        stat.st_size,
+                        stat.st_mtime_ns,
+                        stat.st_ctime_ns,
+                    )
+                )
         except OSError:
             continue
-    for relative_path, size, modified_ns in sorted(entries):
-        digest.update(f"{relative_path}\0{size}\0{modified_ns}\n".encode())
+    for relative_path, inode, size, modified_ns, changed_ns in sorted(entries):
+        digest.update(f"{relative_path}\0{inode}\0{size}\0{modified_ns}\0{changed_ns}\n".encode())
     return digest.hexdigest()
 
 
