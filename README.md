@@ -26,7 +26,7 @@ O comando `pip` não instalará pacotes adicionais.
 - cria snapshots com data e hora
 - mantém backups recentes automaticamente
 - permite restaurar o último snapshot ou um específico
-- roda automaticamente uma vez por mês (dia e horário configuráveis via `BACKUP_DAY`/`BACKUP_HOUR`/`BACKUP_MINUTE` no `.env`, padrão dia 1 às 02:00)
+- roda automaticamente com frequência configurável — diária, semanal ou mensal — via `BACKUP_FREQUENCY` no `.env` (padrão: mensal, dia 1, às 02:00)
 - se o Mac estiver dormindo no horário, o macOS executa o agendamento quando ele voltar a ficar ativo
 - backups avulsos a qualquer momento: `backup_outlook_professional.py backup`
 - cria automaticamente a pasta de destino e `backup_outlook.log` se ainda não existirem
@@ -78,7 +78,7 @@ chmod +x install_automation.sh
 ./install_automation.sh
 ```
 
-O instalador copia o script para `~/Library/Application Support/BackupOutlook` e instala o agente mensal (dia 1 às 02:00 por padrão, ajustável no `.env`). O projeto clonado é apenas a fonte de atualização; o macOS executa a cópia de produção.
+O instalador copia o script para `~/Library/Application Support/BackupOutlook` e instala o agente automático (mensal, dia 1, às 02:00 por padrão — ajustável no `.env`, ver [Agendamento no macOS](#agendamento-no-macos)). O projeto clonado é apenas a fonte de atualização; o macOS executa a cópia de produção.
 
 Na primeira execução, o programa cria automaticamente o destino configurado e o arquivo `backup_outlook.log`. Não é necessário criar o log manualmente.
 
@@ -91,7 +91,7 @@ launchctl list | grep -E 'backupoutlook|backup.outlook'
 O resultado esperado é:
 
 ```text
--       0       com.backupoutlook.monthly
+-       0       com.backupoutlook.scheduled
 ```
 
 ## Atualizar a produção
@@ -104,7 +104,7 @@ git pull origin main
 ./install_automation.sh
 ```
 
-O instalador atualiza a cópia de produção, preserva o `.env` existente e recarrega o agente mensal.
+O instalador atualiza a cópia de produção, preserva o `.env` existente e recarrega o agente automático.
 
 ## Operação manual
 
@@ -154,22 +154,31 @@ python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professi
 
 ## Agendamento no macOS
 
-O agente mensal fica em:
+O agente automático fica em:
 
 ```bash
-~/Library/LaunchAgents/com.backupoutlook.monthly.plist
+~/Library/LaunchAgents/com.backupoutlook.scheduled.plist
 ```
 
-Dia e horário são lidos de `BACKUP_DAY`, `BACKUP_HOUR` e `BACKUP_MINUTE` no `.env` (padrão: dia 1, 02:00) no momento em que `./install_automation.sh` roda. Para mudar o agendamento, edite essas variáveis no `.env` de produção (`~/Library/Application Support/BackupOutlook/.env`) e rode o instalador de novo.
+A frequência e o horário são lidos do `.env` no momento em que `./install_automation.sh` roda:
+
+| Variável | Uso | Valores |
+| --- | --- | --- |
+| `BACKUP_FREQUENCY` | `daily`, `weekly` ou `monthly` | padrão: `monthly` |
+| `BACKUP_HOUR` / `BACKUP_MINUTE` | horário, vale pra qualquer frequência | 0-23 / 0-59, padrão 02:00 |
+| `BACKUP_DAY` | dia do mês, só se `BACKUP_FREQUENCY=monthly` | 1-28, padrão 1 |
+| `BACKUP_WEEKDAY` | dia da semana, só se `BACKUP_FREQUENCY=weekly` | 0=domingo...6=sábado, padrão 1 (segunda) |
+
+Para mudar o agendamento: edite essas variáveis no `.env` de produção (`~/Library/Application Support/BackupOutlook/.env`) e rode `./install_automation.sh` de novo — ele reescreve o agente com o novo horário/frequência. Valores fora do intervalo ou `BACKUP_FREQUENCY` desconhecido fazem o instalador parar com erro em vez de agendar algo errado.
 
 Se o Mac estiver dormindo no horário agendado, o macOS executa o agendamento quando voltar a ficar ativo.
 
-Retenção padrão mantém até 400 dias ou 20 snapshots (o que vier primeiro) — suficiente para não perder backups mensais entre execuções. Ajuste com `cleanup --days` / `--count` se quiser outro limite.
+Retenção padrão mantém até 400 dias ou 20 snapshots (o que vier primeiro). Se mudar para `daily`, vale reduzir `--days` pra não acumular dezenas de ZIPs grandes — ajuste com `cleanup --days` / `--count`.
 
 Para remover o agente:
 
 ```bash
-launchctl bootout "gui/$(id -u)/com.backupoutlook.monthly"
+launchctl bootout "gui/$(id -u)/com.backupoutlook.scheduled"
 ```
 
 ## Importante
