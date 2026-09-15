@@ -35,8 +35,10 @@ O comando `pip` não instalará pacotes adicionais.
 Origem padrão:
 
 ```bash
-$HOME/Library/Group Containers/UBF8T346G9.Office/Outlook/Outlook 15 Profiles/Main Profile
+auto
 ```
+
+Com `ORIGEM="auto"`, o programa tenta localizar o perfil real do Outlook no macOS. Ele testa caminhos conhecidos, como `Outlook Profiles/Main Profile`, `Outlook 15 Profiles/Main Profile` e `Outlook 15 Profiles/Main Identity`, e também procura por nomes de perfil conhecidos em pastas prováveis da Library.
 
 Destino padrão:
 
@@ -62,7 +64,7 @@ cp .env.example "$HOME/Library/Application Support/BackupOutlook/.env"
 chmod 600 "$HOME/Library/Application Support/BackupOutlook/.env"
 ```
 
-Edite `ORIGEM` e `DESTINO` conforme os caminhos reais da sua máquina:
+Edite `DESTINO` se quiser mudar a pasta de backup. Mantenha `ORIGEM="auto"` para detectar o perfil do Outlook automaticamente, ou informe um caminho manual se tiver um perfil específico:
 
 ```bash
 nano "$HOME/Library/Application Support/BackupOutlook/.env"
@@ -188,12 +190,12 @@ Copie o modelo para a configuração local da automação:
 cp .env.example "$HOME/Library/Application Support/BackupOutlook/.env"
 ```
 
-Edite esse arquivo e altere `ORIGEM` e `DESTINO` conforme necessário. O arquivo `.env` real é ignorado pelo Git e não será publicado. Variáveis definidas diretamente no shell têm prioridade sobre o `.env`. Se o arquivo existir, mas não puder ser lido, o programa interromperá a execução em vez de usar um destino diferente silenciosamente.
+Edite esse arquivo e altere `DESTINO` conforme necessário. Mantenha `ORIGEM="auto"` para detectar o perfil do Outlook automaticamente, ou substitua por um caminho manual se precisar apontar para um perfil específico. O arquivo `.env` real é ignorado pelo Git e não será publicado. Variáveis definidas diretamente no shell têm prioridade sobre o `.env`. Se o arquivo existir, mas não puder ser lido, o programa interromperá a execução em vez de usar um destino diferente silenciosamente.
 
 Exemplo de configuração:
 
 ```bash
-ORIGEM="$HOME/Library/Group Containers/UBF8T346G9.Office/Outlook/Outlook 15 Profiles/Main Profile"
+ORIGEM="auto"
 DESTINO="$HOME/Library/CloudStorage/OneDrive/Outlook-Backups"
 ```
 

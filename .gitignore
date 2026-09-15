@@ -1,6 +1,31 @@
+# macOS
+.DS_Store
+
+# Python
 __pycache__/
 *.py[cod]
-.DS_Store
-.outlook_profile_state.json
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Local configuration and runtime state
 .env
+.outlook_profile_state.json
 *.log
+
+# Backup artifacts
+Outlook_Profile_*.zip
+*.pre_restore_*.zip
+
+# DL Method / local agent tooling
+.agents/
+.claude/
+.opencode/
+.github/skills/
+_dl/
+_dl-output/
+.graphify.env
+skills-lock.json
+package.json

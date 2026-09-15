@@ -12,7 +12,6 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
-DEFAULT_ORIGEM = Path.home() / "Library" / "Group Containers" / "UBF8T346G9.Office" / "Outlook" / "Outlook 15 Profiles" / "Main Profile"
 DEFAULT_DESTINO = Path.home() / "Library" / "CloudStorage" / "OneDrive" / "Outlook-Backups"
 DEFAULT_RETENTION_DAYS = 30
 DEFAULT_MAX_BACKUPS = 20
@@ -24,6 +23,73 @@ RETRY_ERRNOS = {4, 5, 23}
 CONFIG_FILENAME = ".env"
 LOG_FILENAME = "backup_outlook.log"
 LOG_PATH = None
+OUTLOOK_PROFILE_NAMES = ("Main Profile", "Main Identity")
+
+
+def outlook_profile_search_roots():
+    library = Path.home() / "Library"
+    return [
+        library / "Group Containers" / "UBF8T346G9.Office" / "Outlook",
+        library / "Containers" / "com.microsoft.Outlook",
+        library / "Application Support" / "Microsoft" / "Outlook",
+    ]
+
+
+def known_outlook_profile_paths():
+    outlook_root = Path.home() / "Library" / "Group Containers" / "UBF8T346G9.Office" / "Outlook"
+    candidates = []
+    for profiles_dir in ("Outlook Profiles", "Outlook 15 Profiles"):
+        for profile_name in OUTLOOK_PROFILE_NAMES:
+            candidates.append(outlook_root / profiles_dir / profile_name)
+    return candidates
+
+
+def unique_paths(paths):
+    seen = set()
+    unique = []
+    for path in paths:
+        path = Path(path).expanduser()
+        key = str(path)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(path)
+    return unique
+
+
+def outlook_profile_candidates():
+    candidates = list(known_outlook_profile_paths())
+    for root in outlook_profile_search_roots():
+        if not root.exists():
+            continue
+        try:
+            for profile_name in OUTLOOK_PROFILE_NAMES:
+                for candidate in root.rglob(profile_name):
+                    if candidate.is_dir() and "Outlook" in str(candidate):
+                        candidates.append(candidate)
+        except OSError:
+            continue
+    return unique_paths(candidates)
+
+
+def discover_outlook_profile():
+    candidates = outlook_profile_candidates()
+    for candidate in candidates:
+        if candidate.exists() and candidate.is_dir():
+            return candidate
+
+    tested = "\n".join(f"- {candidate}" for candidate in candidates)
+    raise FileNotFoundError(
+        "Nenhum perfil do Outlook encontrado. Caminhos testados:\n"
+        f"{tested or '- nenhum caminho candidato encontrado'}"
+    )
+
+
+def resolve_origin():
+    configured = os.environ.get("ORIGEM")
+    if configured and configured.strip().lower() != "auto":
+        return Path(configured).expanduser()
+    return discover_outlook_profile()
 
 
 def now_stamp() -> str:
@@ -418,7 +484,6 @@ def main():
         return 1
 
     args = parse_args()
-    origem = Path(os.environ.get("ORIGEM", str(DEFAULT_ORIGEM)))
     destino = Path(os.environ.get("DESTINO", str(DEFAULT_DESTINO)))
     try:
         configure_log_file(destino)
@@ -432,12 +497,14 @@ def main():
 
     try:
         if args.command == "backup":
+            origem = resolve_origin()
             backup_profile(origem, destino, DEFAULT_MAX_BACKUPS, DEFAULT_RETENTION_DAYS, force=args.force)
             return 0
 
         if args.command == "restore":
             if not args.snapshot:
                 raise ValueError("Informe o caminho do snapshot para restaurar.")
+            origem = resolve_origin()
             restore_snapshot(Path(args.snapshot), origem)
             return 0
 
@@ -454,6 +521,7 @@ def main():
             if latest is None:
                 print(f"Nenhum backup encontrado em {destino}")
                 return 0
+            origem = resolve_origin()
             restore_snapshot(latest, origem)
             return 0
 
