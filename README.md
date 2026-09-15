@@ -26,8 +26,9 @@ O comando `pip` não instalará pacotes adicionais.
 - cria snapshots com data e hora
 - mantém backups recentes automaticamente
 - permite restaurar o último snapshot ou um específico
-- roda uma vez por dia às 2:00
+- roda automaticamente uma vez por mês (dia e horário configuráveis via `BACKUP_DAY`/`BACKUP_HOUR`/`BACKUP_MINUTE` no `.env`, padrão dia 1 às 02:00)
 - se o Mac estiver dormindo no horário, o macOS executa o agendamento quando ele voltar a ficar ativo
+- backups avulsos a qualquer momento: `backup_outlook_professional.py backup`
 - cria automaticamente a pasta de destino e `backup_outlook.log` se ainda não existirem
 
 ## Caminho do Outlook e destino
@@ -77,7 +78,7 @@ chmod +x install_automation.sh
 ./install_automation.sh
 ```
 
-O instalador copia o script para `~/Library/Application Support/BackupOutlook` e instala o agente diário às 2:00. O projeto clonado é apenas a fonte de atualização; o macOS executa a cópia de produção.
+O instalador copia o script para `~/Library/Application Support/BackupOutlook` e instala o agente mensal (dia 1 às 02:00 por padrão, ajustável no `.env`). O projeto clonado é apenas a fonte de atualização; o macOS executa a cópia de produção.
 
 Na primeira execução, o programa cria automaticamente o destino configurado e o arquivo `backup_outlook.log`. Não é necessário criar o log manualmente.
 
@@ -90,7 +91,7 @@ launchctl list | grep -E 'backupoutlook|backup.outlook'
 O resultado esperado é:
 
 ```text
--       0       com.backupoutlook.daily
+-       0       com.backupoutlook.monthly
 ```
 
 ## Atualizar a produção
@@ -103,7 +104,7 @@ git pull origin main
 ./install_automation.sh
 ```
 
-O instalador atualiza a cópia de produção, preserva o `.env` existente e recarrega o agente diário.
+O instalador atualiza a cópia de produção, preserva o `.env` existente e recarrega o agente mensal.
 
 ## Operação manual
 
@@ -148,23 +149,27 @@ python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professi
 ### Limpar backups antigos
 
 ```bash
-python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professional.py" cleanup --days 30 --count 20
+python3 "$HOME/Library/Application Support/BackupOutlook/backup_outlook_professional.py" cleanup --days 400 --count 20
 ```
 
 ## Agendamento no macOS
 
-O agente diário fica em:
+O agente mensal fica em:
 
 ```bash
-~/Library/LaunchAgents/com.backupoutlook.daily.plist
+~/Library/LaunchAgents/com.backupoutlook.monthly.plist
 ```
 
-Se o Mac estiver dormindo às 2:00, o macOS executa o agendamento quando voltar a ficar ativo.
+Dia e horário são lidos de `BACKUP_DAY`, `BACKUP_HOUR` e `BACKUP_MINUTE` no `.env` (padrão: dia 1, 02:00) no momento em que `./install_automation.sh` roda. Para mudar o agendamento, edite essas variáveis no `.env` de produção (`~/Library/Application Support/BackupOutlook/.env`) e rode o instalador de novo.
+
+Se o Mac estiver dormindo no horário agendado, o macOS executa o agendamento quando voltar a ficar ativo.
+
+Retenção padrão mantém até 400 dias ou 20 snapshots (o que vier primeiro) — suficiente para não perder backups mensais entre execuções. Ajuste com `cleanup --days` / `--count` se quiser outro limite.
 
 Para remover o agente:
 
 ```bash
-launchctl bootout "gui/$(id -u)/com.backupoutlook.daily"
+launchctl bootout "gui/$(id -u)/com.backupoutlook.monthly"
 ```
 
 ## Importante

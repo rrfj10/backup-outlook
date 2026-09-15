@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.backupoutlook.daily</string>
+  <string>com.backupoutlook.monthly</string>
   <key>ProgramArguments</key>
   <array>
     <string>/usr/bin/python3</string>
@@ -14,14 +14,16 @@
   <false/>
   <key>StartCalendarInterval</key>
   <dict>
+    <key>Day</key>
+    <integer>__BACKUP_DAY__</integer>
     <key>Hour</key>
-    <integer>2</integer>
+    <integer>__BACKUP_HOUR__</integer>
     <key>Minute</key>
-    <integer>0</integer>
+    <integer>__BACKUP_MINUTE__</integer>
   </dict>
   <key>StandardOutPath</key>
-  <string>__LOG_DIR__/backup_outlook_daily.log</string>
+  <string>__LOG_DIR__/backup_outlook_monthly.log</string>
   <key>StandardErrorPath</key>
-  <string>__LOG_DIR__/backup_outlook_daily_error.log</string>
+  <string>__LOG_DIR__/backup_outlook_monthly_error.log</string>
 </dict>
 </plist>
